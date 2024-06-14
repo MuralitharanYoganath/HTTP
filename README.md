@@ -34,28 +34,47 @@
 
         - [Reactive Negotiation](#reactive-negotiation)
 
-4.   Request Methods
-4.1.   Overview
-4.2.   Common Method Properties
-4.2.1.   Safe Methods
-4.2.2.   Idempotent Methods
-4.2.3.   Cacheable Methods
-4.3.   Method Definitions
-4.3.1.   GET
-4.3.2.   HEAD
-4.3.3.   POST
-4.3.4.   PUT
-4.3.5.   DELETE
-4.3.6.   CONNECT
-4.3.7.   OPTIONS
-4.3.8.   TRACE
+- [Request Methods](#request-methods)
+    
+    - [Overview](#overview)
 
-5.   Request Header Fields
-5.1.   Controls
-5.1.1.   Expect
-5.1.2.   Max-Forwards
-5.2.   Conditionals
-5.3.   Content Negotiation
+    - [Common Method Properties](#common-method-properties)
+
+        - [Safe Methods](#safe-methods)
+
+        - [Idempotent Methods](#idempotent-methods)
+
+        - [Cacheable Methods](#cacheable-methods)
+
+    - [Method Definitions](#method-definitions)
+
+        - [GET](#get)
+
+        - [HEAD](#head)
+
+        - [POST](#post)
+
+        - [PUT](#put)
+
+        - [DELETE](#delete)
+
+        - [CONNECT](#connect)
+
+        - [OPTIONS](#options)
+
+        - [TRACE](#trace)
+
+- [Request Header Fields](#request-header-fields)
+
+    - [Controls]
+
+        - [Expect](#expect)
+
+        - [Max-Forwards](#max-forwards)
+
+      - [Conditionals](#conditionals)
+
+      - [Content Negotiation](#content-negotiation-1)
 5.3.1.   Quality Values
 5.3.2.   Accept
 5.3.3.   Accept-Charset
@@ -643,63 +662,718 @@ A client MUST NOT send a message body in a TRACE request.
 
 Responses to the TRACE method are not cacheable.
 
-5.   Request Header Fields
-5.1.   Controls
-5.1.1.   Expect
-5.1.2.   Max-Forwards
-5.2.   Conditionals
-5.3.   Content Negotiation
-5.3.1.   Quality Values
-5.3.2.   Accept
-5.3.3.   Accept-Charset
-5.3.4.   Accept-Encoding
-5.3.5.   Accept-Language
-5.4.   Authentication Credentials
-5.5.   Request Context
-5.5.1.   From
-5.5.2.   Referer
-5.5.3.   User-Agent
+## Request Header Fields
 
-6.   Response Status Codes
-6.1.   Overview of Status Codes
-6.2.   Informational 1xx
-6.2.1.   100 Continue
-6.2.2.   101 Switching Protocols
-6.3.   Successful 2xx
-6.3.1.   200 OK
-6.3.2.   201 Created
-6.3.3.   202 Accepted
-6.3.4.   203 Non-Authoritative Information
-6.3.5.   204 No Content
-6.3.6.   205 Reset Content
-6.4.   Redirection 3xx
-6.4.1.   300 Multiple Choices
-6.4.2.   301 Moved Permanently
-6.4.3.   302 Found
-6.4.4.   303 See Other
-6.4.5.   305 Use Proxy
-6.4.6.   306 (Unused)
-6.4.7.   307 Temporary Redirect
-6.5.   Client Error 4xx
-6.5.1.   400 Bad Request
-6.5.2.   402 Payment Required
-6.5.3.   403 Forbidden
-6.5.4.   404 Not Found
-6.5.5.   405 Method Not Allowed
-6.5.6.   406 Not Acceptable
-6.5.7.   408 Request Timeout
-6.5.8.   409 Conflict
-6.5.9.   410 Gone
-6.5.10.   411 Length Required
-6.5.11.   413 Payload Too Large
-6.5.12.   414 URI Too Long
-6.5.13.   415 Unsupported Media Type
-6.5.14.   417 Expectation Failed
-6.5.15.   426 Upgrade Required
+A client sends request header fields to provide more information about the request context, make the request conditional based on the target resource state, suggest preferred formats for the response, supply authentication credentials, or modify the expected request processing. These fields act as request modifiers, similar to the parameters on a programming language method invocation.
+
+### Controls
+
+Controls are request header fields that direct specific handling of the request.
+
+| Header Field Name	| Defined in...            |
+|-------------------|--------------------------|
+| Cache-Control     |	Section 5.2 of [RFC7234] |
+| Expect            |	Section 5.1.1            |
+| Host              | Section 5.4 of [RFC7230] |
+| Max-Forwards      | Section 5.1.2            |
+| Pragma            | Section 5.4 of [RFC7234] |
+| Range             |	Section 3.1 of [RFC7233] |
+| TE                | Section 4.3 of [RFC7230] |
+
+#### Expect
+
+The "Expect" header field in a request indicates a certain set of behaviors (expectations) that need to be supported by the server in order to properly handle this request. The only such expectation defined by this specification is 100-continue.
+
+```shell
+  Expect  = "100-continue"
+```
+
+The Expect field-value is case-insensitive.
+
+A server that receives an Expect field-value other than 100-continue MAY respond with a 417 (Expectation Failed) status code to indicate that the unexpected expectation cannot be met.
+
+A 100-continue expectation informs recipients that the client is about to send a (presumably large) message body in this request and wishes to receive a 100 (Continue) interim response if the request-line and header fields are not sufficient to cause an immediate success, redirect, or error response. This allows the client to wait for an indication that it is worthwhile to send the message body before actually doing so, which can improve efficiency when the message body is huge or when the client anticipates that an error is likely (e.g., when sending a state-changing method, for the first time, without previously verified authentication credentials).
+
+For example, a request that begins with
+
+```shell
+PUT /somewhere/fun HTTP/1.1
+Host: origin.example.com
+Content-Type: video/h264
+Content-Length: 1234567890987
+Expect: 100-continue
+```
+
+allows the origin server to immediately respond with an error message, such as 401 (Unauthorized) or 405 (Method Not Allowed), before the client starts filling the pipes with an unnecessary data transfer.
+
+**Requirements for clients:**
+
+* A client MUST NOT generate a 100-continue expectation in a request that does not include a message body.
+
+* A client that will wait for a 100 (Continue) response before sending the request message body MUST send an Expect header field containing a 100-continue expectation.
+
+* A client that sends a 100-continue expectation is not required to wait for any specific length of time; such a client MAY proceed to send the message body even if it has not yet received a response. Furthermore, since 100 (Continue) responses cannot be sent through an HTTP/1.0 intermediary, such a client SHOULD NOT wait for an indefinite period before sending the message body.
+
+* A client that receives a 417 (Expectation Failed) status code in response to a request containing a 100-continue expectation SHOULD repeat that request without a 100-continue expectation, since the 417 response merely indicates that the response chain does not support expectations (e.g., it passes through an HTTP/1.0 server).
+
+**Requirements for servers:**
+
+* A server that receives a 100-continue expectation in an HTTP/1.0 request MUST ignore that expectation.
+
+* A server MAY omit sending a 100 (Continue) response if it has already received some or all of the message body for the corresponding request, or if the framing indicates that there is no message body.
+
+* A server that sends a 100 (Continue) response MUST ultimately send a final status code, once the message body is received and processed, unless the connection is closed prematurely.
+* A server that responds with a final status code before reading the entire message body SHOULD indicate in that response whether it intends to close the connection or continue reading and discarding the request message (see Section 6.6 of [RFC7230]).
+
+An origin server MUST, upon receiving an HTTP/1.1 (or later) request-line and a complete header section that contains a 100-continue expectation and indicates a request message body will follow, either send an immediate response with a final status code, if that status can be determined by examining just the request-line and header fields, or send an immediate 100 (Continue) response to encourage the client to send the request's message body. The origin server MUST NOT wait for the message body before sending the 100 (Continue) response.
+
+A proxy MUST, upon receiving an HTTP/1.1 (or later) request-line and a complete header section that contains a 100-continue expectation and indicates a request message body will follow, either send an immediate response with a final status code, if that status can be determined by examining just the request-line and header fields, or begin forwarding the request toward the origin server by sending a corresponding request-line and header section to the next inbound server. If the proxy believes (from configuration or past interaction) that the next inbound server only supports HTTP/1.0, the proxy MAY generate an immediate 100 (Continue) response to encourage the client to begin sending the message body.
+
+**Note:** The Expect header field was added after the original publication of HTTP/1.1 [RFC2068] as both the means to request an interim 100 (Continue) response and the general mechanism for indicating must-understand extensions. However, the extension mechanism has not been used by clients and the must-understand requirements have not been implemented by many servers, rendering the extension mechanism useless. This specification has removed the extension mechanism in order to simplify the definition and processing of 100-continue.
+
+#### Max-Forwards
+
+The "Max-Forwards" header field provides a mechanism with the TRACE (Section 4.3.8) and OPTIONS (Section 4.3.7) request methods to limit the number of times that the request is forwarded by proxies. This can be useful when the client is attempting to trace a request that appears to be failing or looping mid-chain.
+
+```shell
+  Max-Forwards = 1*DIGIT
+```
+
+The Max-Forwards value is a decimal integer indicating the remaining number of times this request message can be forwarded.
+
+Each intermediary that receives a TRACE or OPTIONS request containing a Max-Forwards header field MUST check and update its value prior to forwarding the request. If the received value is zero (0), the intermediary MUST NOT forward the request; instead, the intermediary MUST respond as the final recipient. If the received Max-Forwards value is greater than zero, the intermediary MUST generate an updated Max-Forwards field in the forwarded message with a field-value that is the lesser of a) the received value decremented by one (1) or b) the recipient's maximum supported value for Max-Forwards.
+
+A recipient MAY ignore a Max-Forwards header field received with any other request methods.
+
+### Conditionals
+
+The HTTP conditional request header fields [RFC7232] allow a client to place a precondition on the state of the target resource, so that the action corresponding to the method semantics will not be applied if the precondition evaluates to false. Each precondition defined by this specification consists of a comparison between a set of validators obtained from prior representations of the target resource to the current state of validators for the selected representation (Section 7.2). Hence, these preconditions evaluate whether the state of the target resource has changed since a given state known by the client. The effect of such an evaluation depends on the method semantics and choice of conditional, as defined in Section 5 of [RFC7232].
+
+| Header Field Name	  | Defined in...               |
+|---------------------|-----------------------------|
+| If-Match            | Section 3.1 of [RFC7232]    |
+| If-None-Match	      | Section 3.2 of [RFC7232]    |
+| If-Modified-Since	  | Section 3.3 of [RFC7232]    |
+| If-Unmodified-Since	| Section 3.4 of [RFC7232]    |
+| If-Range            | Section 3.2 of [RFC7233]    |
 
 
-7.   Response Header Fields
-7.1.   Control Data
+### Content Negotiation
+
+The following request header fields are sent by a user agent to engage in proactive negotiation of the response content, as defined in Section 3.4.1. The preferences sent in these fields apply to any content in the response, including representations of the target resource, representations of error or processing status, and potentially even the miscellaneous text strings that might appear within the protocol.
+
+| Header Field Name	 | Defined in...  |
+|--------------------|----------------|
+| Accept             | Section 5.3.2  |            
+| Accept-Charset     | Section 5.3.3  |
+| Accept-Encoding    | Section 5.3.4  |
+| Accept-Language    | Section 5.3.5  |
+
+
+#### Quality Values
+
+Many of the request header fields for proactive negotiation use a common parameter, named "q" (case-insensitive), to assign a relative "weight" to the preference for that associated kind of content. This weight is referred to as a "quality value" (or "qvalue") because the same parameter name is often used within server configurations to assign a weight to the relative quality of the various representations that can be selected for a resource.
+
+The weight is normalized to a real number in the range 0 through 1, where 0.001 is the least preferred and 1 is the most preferred; a value of 0 means "not acceptable". If no "q" parameter is present, the default weight is 1.
+
+```shell
+  weight = OWS ";" OWS "q=" qvalue
+  qvalue = ( "0" [ "." 0*3DIGIT ] )
+         / ( "1" [ "." 0*3("0") ] )
+```
+
+A sender of qvalue MUST NOT generate more than three digits after the decimal point. User configuration of these values ought to be limited in the same fashion.
+
+#### Accept
+
+The "Accept" header field can be used by user agents to specify response media types that are acceptable. Accept header fields can be used to indicate that the request is specifically limited to a small set of desired types, as in the case of a request for an in-line image.
+
+```shell
+  Accept = #( media-range [ accept-params ] )
+  
+  media-range    = ( "*/*"
+                   / ( type "/" "*" )
+                   / ( type "/" subtype )
+                   ) *( OWS ";" OWS parameter )
+  accept-params  = weight *( accept-ext )
+  accept-ext = OWS ";" OWS token [ "=" ( token / quoted-string ) ]
+```
+
+The asterisk "*" character is used to group media types into ranges, with "*/*" indicating all media types and "type/*" indicating all subtypes of that type. The media-range can include media type parameters that are applicable to that range.
+
+Each media-range might be followed by zero or more applicable media type parameters (e.g., charset), an optional "q" parameter for indicating a relative weight (Section 5.3.1), and then zero or more extension parameters. The "q" parameter is necessary if any extensions (accept-ext) are present, since it acts as a separator between the two parameter sets.
+
+**Note**: Use of the "q" parameter name to separate media type parameters from Accept extension parameters is due to historical practice. Although this prevents any media type parameter named "q" from being used with a media range, such an event is believed to be unlikely given the lack of any "q" parameters in the IANA media type registry and the rare usage of any media type parameters in Accept. Future media types are discouraged from registering any parameter named "q".
+
+The example
+
+```shell
+  Accept: audio/*; q=0.2, audio/basic
+```
+
+is interpreted as "I prefer audio/basic, but send me any audio type if it is the best available after an 80% markdown in quality".
+
+A request without any Accept header field implies that the user agent will accept any media type in response. If the header field is present in a request and none of the available representations for the response have a media type that is listed as acceptable, the origin server can either honor the header field by sending a 406 (Not Acceptable) response or disregard the header field by treating the response as if it is not subject to content negotiation.
+
+A more elaborate example is
+
+```shell
+  Accept: text/plain; q=0.5, text/html,
+          text/x-dvi; q=0.8, text/x-c
+```
+
+Verbally, this would be interpreted as "text/html and text/x-c are the equally preferred media types, but if they do not exist, then send the text/x-dvi representation, and if that does not exist, send the text/plain representation".
+
+Media ranges can be overridden by more specific media ranges or specific media types. If more than one media range applies to a given type, the most specific reference has precedence. For example,
+
+```shell
+  Accept: text/*, text/plain, text/plain;format=flowed, */*
+```
+
+have the following precedence:
+
+1. text/plain;format=flowed
+2. text/plain
+3. text/*
+4. */*
+
+The media type quality factor associated with a given type is determined by finding the media range with the highest precedence that matches the type. For example,
+
+```shell
+  Accept: text/*;q=0.3, text/html;q=0.7, text/html;level=1,
+          text/html;level=2;q=0.4, */*;q=0.5
+```
+
+would cause the following values to be associated:
+
+| Media Type        | Quality Value |
+|-------------------|---------------|
+| text/html;level=1	| 1             |
+| text/html         |	0.7           |
+| text/plain        | 0.3           |
+| image/jpeg        | 0.5           |
+| text/html;level=2	| 0.4           |
+| text/html;level=3	| 0.7           |
+
+**Note**: A user agent might be provided with a default set of quality values for certain media ranges. However, unless the user agent is a closed system that cannot interact with other rendering agents, this default set ought to be configurable by the user.
+
+#### Accept-Charset
+
+The "Accept-Charset" header field can be sent by a user agent to indicate what charsets are acceptable in textual response content. This field allows user agents capable of understanding more comprehensive or special-purpose charsets to signal that capability to an origin server that is capable of representing information in those charsets.
+
+```shell
+  Accept-Charset = 1#( ( charset / "*" ) [ weight ] )
+```
+
+Charset names are defined in Section 3.1.1.2. A user agent MAY associate a quality value with each charset to indicate the user's relative preference for that charset, as defined in Section 5.3.1. An example is
+
+```shell
+  Accept-Charset: iso-8859-5, unicode-1-1;q=0.8
+```
+
+The special value "*", if present in the Accept-Charset field, matches every charset that is not mentioned elsewhere in the Accept-Charset field. If no "*" is present in an Accept-Charset field, then any charsets not explicitly mentioned in the field are considered "not acceptable" to the client.
+
+A request without any Accept-Charset header field implies that the user agent will accept any charset in response. Most general-purpose user agents do not send Accept-Charset, unless specifically configured to do so, because a detailed list of supported charsets makes it easier for a server to identify an individual by virtue of the user agent's request characteristics (Section 9.7).
+
+If an Accept-Charset header field is present in a request and none of the available representations for the response has a charset that is listed as acceptable, the origin server can either honor the header field, by sending a 406 (Not Acceptable) response, or disregard the header field by treating the resource as if it is not subject to content negotiation.
+
+#### Accept-Encoding
+
+The "Accept-Encoding" header field can be used by user agents to indicate what response content-codings (Section 3.1.2.1) are acceptable in the response. An "identity" token is used as a synonym for "no encoding" in order to communicate when no encoding is preferred.
+
+```shell
+  Accept-Encoding  = #( codings [ weight ] )
+  codings          = content-coding / "identity" / "*"
+```
+
+Each codings value MAY be given an associated quality value representing the preference for that encoding, as defined in Section 5.3.1. The asterisk "*" symbol in an Accept-Encoding field matches any available content-coding not explicitly listed in the header field.
+
+For example,
+```shell
+  Accept-Encoding: compress, gzip
+  Accept-Encoding:
+  Accept-Encoding: *
+  Accept-Encoding: compress;q=0.5, gzip;q=1.0
+  Accept-Encoding: gzip;q=1.0, identity; q=0.5, *;q=0
+```
+
+A request without an Accept-Encoding header field implies that the user agent has no preferences regarding content-codings. Although this allows the server to use any content-coding in a response, it does not imply that the user agent will be able to correctly process all encodings.
+
+A server tests whether a content-coding for a given representation is acceptable using these rules:
+
+* If no Accept-Encoding field is in the request, any content-coding is considered acceptable by the user agent.
+
+* If the representation has no content-coding, then it is acceptable by default unless specifically excluded by the Accept-Encoding field stating either "identity;q=0" or "*;q=0" without a more specific entry for "identity".
+
+* If the representation's content-coding is one of the content-codings listed in the Accept-Encoding field, then it is acceptable unless it is accompanied by a qvalue of 0. (As defined in Section 5.3.1, a qvalue of 0 means "not acceptable".)
+
+* If multiple content-codings are acceptable, then the acceptable content-coding with the highest non-zero qvalue is preferred.
+
+An Accept-Encoding header field with a combined field-value that is empty implies that the user agent does not want any content-coding in response. If an Accept-Encoding header field is present in a request and none of the available representations for the response have a content-coding that is listed as acceptable, the origin server SHOULD send a response without any content-coding.
+
+**Note**: Most HTTP/1.0 applications do not recognize or obey qvalues associated with content-codings. This means that qvalues might not work and are not permitted with x-gzip or x-compress.
+
+#### Accept-Language
+
+The "Accept-Language" header field can be used by user agents to indicate the set of natural languages that are preferred in the response. Language tags are defined in Section 3.1.3.1.
+
+```shell
+  Accept-Language = 1#( language-range [ weight ] )
+  language-range  = 
+            <language-range, see [RFC4647], Section 2.1>
+```
+
+Each language-range can be given an associated quality value representing an estimate of the user's preference for the languages specified by that range, as defined in Section 5.3.1. For example,
+
+```shell
+  Accept-Language: da, en-gb;q=0.8, en;q=0.7
+```
+
+would mean: "I prefer Danish, but will accept British English and other types of English".
+
+A request without any Accept-Language header field implies that the user agent will accept any language in response. If the header field is present in a request and none of the available representations for the response have a matching language tag, the origin server can either disregard the header field by treating the response as if it is not subject to content negotiation or honor the header field by sending a 406 (Not Acceptable) response. However, the latter is not encouraged, as doing so can prevent users from accessing content that they might be able to use (with translation software, for example).
+
+Note that some recipients treat the order in which language tags are listed as an indication of descending priority, particularly for tags that are assigned equal quality values (no value is the same as q=1). However, this behavior cannot be relied upon. For consistency and to maximize interoperability, many user agents assign each language tag a unique quality value while also listing them in order of decreasing quality. Additional discussion of language priority lists can be found in Section 2.3 of [RFC4647].
+
+For matching, Section 3 of [RFC4647] defines several matching schemes. Implementations can offer the most appropriate matching scheme for their requirements. The "Basic Filtering" scheme ([RFC4647], Section 3.3.1) is identical to the matching scheme that was previously defined for HTTP in Section 14.4 of [RFC2616].
+
+It might be contrary to the privacy expectations of the user to send an Accept-Language header field with the complete linguistic preferences of the user in every request (Section 9.7).
+
+Since intelligibility is highly dependent on the individual user, user agents need to allow user control over the linguistic preference (either through configuration of the user agent itself or by defaulting to a user controllable system setting). A user agent that does not provide such control to the user MUST NOT send an Accept-Language header field.
+
+**Note**: User agents ought to provide guidance to users when setting a preference, since users are rarely familiar with the details of language matching as described above. For example, users might assume that on selecting "en-gb", they will be served any kind of English document if British English is not available. A user agent might suggest, in such a case, to add "en" to the list for better matching behavior.
+
+### Authentication Credentials
+
+Two header fields are used for carrying authentication credentials, as defined in [RFC7235]. Note that various custom mechanisms for user authentication use the Cookie header field for this purpose, as defined in [RFC6265].
+
+| Header Field Name	| Defined in...            |
+|-------------------|--------------------------| 
+| Authorization     | Section 4.2 of [RFC7235] |
+| Proxy-Authorization	Section 4.4 of [RFC7235] |
+
+### Request Context
+
+The following request header fields provide additional information about the request context, including information about the user, user agent, and resource behind the request.
+
+| Header Field Name	  | Defined in...  |
+|---------------------|----------------|
+| From	Section       | 5.5.1          |
+| Referer	Section     | 5.5.2          |
+| User-Agent	Section | 5.5.3          |
+ 
+#### From
+
+The "From" header field contains an Internet email address for a human user who controls the requesting user agent. The address ought to be machine-usable, as defined by "mailbox" in Section 3.4 of [RFC5322]:
+
+```shell
+  From    = mailbox
+  
+  mailbox = <mailbox, see [RFC5322], Section 3.4>
+```
+
+An example is:
+
+```shell
+  From: webmaster@example.org
+```
+
+The From header field is rarely sent by non-robotic user agents. A user agent SHOULD NOT send a From header field without explicit configuration by the user, since that might conflict with the user's privacy interests or their site's security policy.
+
+A robotic user agent SHOULD send a valid From header field so that the person responsible for running the robot can be contacted if problems occur on servers, such as if the robot is sending excessive, unwanted, or invalid requests.
+
+A server SHOULD NOT use the From header field for access control or authentication, since most recipients will assume that the field value is public information.
+
+#### Referer
+
+The "Referer" [sic] header field allows the user agent to specify a URI reference for the resource from which the target URI was obtained (i.e., the "referrer", though the field name is misspelled). A user agent MUST NOT include the fragment and userinfo components of the URI reference [RFC3986], if any, when generating the Referer field value.
+
+```shell
+  Referer = absolute-URI / partial-URI
+```
+
+The Referer header field allows servers to generate back-links to other resources for simple analytics, logging, optimized caching, etc. It also allows obsolete or mistyped links to be found for maintenance. Some servers use the Referer header field as a means of denying links from other sites (so-called "deep linking") or restricting cross-site request forgery (CSRF), but not all requests contain it.
+
+**Example**:
+
+```shell
+  Referer: http://www.example.org/hypertext/Overview.html
+```
+
+If the target URI was obtained from a source that does not have its own URI (e.g., input from the user keyboard, or an entry within the user's bookmarks/favorites), the user agent MUST either exclude the Referer field or send it with a value of "about:blank".
+
+The Referer field has the potential to reveal information about the request context or browsing history of the user, which is a privacy concern if the referring resource's identifier reveals personal information (such as an account name) or a resource that is supposed to be confidential (such as behind a firewall or internal to a secured service). Most general-purpose user agents do not send the Referer header field when the referring resource is a local "file" or "data" URI. A user agent MUST NOT send a Referer header field in an unsecured HTTP request if the referring page was received with a secure protocol. See Section 9.4 for additional security considerations.
+
+Some intermediaries have been known to indiscriminately remove Referer header fields from outgoing requests. This has the unfortunate side effect of interfering with protection against CSRF attacks, which can be far more harmful to their users. Intermediaries and user agent extensions that wish to limit information disclosure in Referer ought to restrict their changes to specific edits, such as replacing internal domain names with pseudonyms or truncating the query and/or path components. An intermediary SHOULD NOT modify or delete the Referer header field when the field value shares the same scheme and host as the request target.
+
+#### User-Agent
+
+The "User-Agent" header field contains information about the user agent originating the request, which is often used by servers to help identify the scope of reported interoperability problems, to work around or tailor responses to avoid particular user agent limitations, and for analytics regarding browser or operating system use. A user agent SHOULD send a User-Agent field in each request unless specifically configured not to do so.
+
+```shell
+  User-Agent = product *( RWS ( product / comment ) )
+```
+
+The User-Agent field-value consists of one or more product identifiers, each followed by zero or more comments (Section 3.2 of [RFC7230]), which together identify the user agent software and its significant subproducts. By convention, the product identifiers are listed in decreasing order of their significance for identifying the user agent software. Each product identifier consists of a name and optional version.
+
+```shell
+  product         = token ["/" product-version]
+  product-version = token
+```
+
+A sender SHOULD limit generated product identifiers to what is necessary to identify the product; a sender MUST NOT generate advertising or other nonessential information within the product identifier. A sender SHOULD NOT generate information in product-version that is not a version identifier (i.e., successive versions of the same product name ought to differ only in the product-version portion of the product identifier).
+
+**Example:**
+
+```shell
+  User-Agent: CERN-LineMode/2.15 libwww/2.17b3
+```
+
+A user agent SHOULD NOT generate a User-Agent field containing needlessly fine-grained detail and SHOULD limit the addition of subproducts by third parties. Overly long and detailed User-Agent field values increase request latency and the risk of a user being identified against their wishes ("fingerprinting").
+
+Likewise, implementations are encouraged not to use the product tokens of other implementations in order to declare compatibility with them, as this circumvents the purpose of the field. If a user agent masquerades as a different user agent, recipients can assume that the user intentionally desires to see responses tailored for that identified user agent, even if they might not work as well for the actual user agent being used.
+
+
+## Response Status Codes
+
+The status-code element is a three-digit integer code giving the result of the attempt to understand and satisfy the request.
+
+HTTP status codes are extensible. HTTP clients are not required to understand the meaning of all registered status codes, though such understanding is obviously desirable. However, a client MUST understand the class of any status code, as indicated by the first digit, and treat an unrecognized status code as being equivalent to the x00 status code of that class, with the exception that a recipient MUST NOT cache a response with an unrecognized status code.
+
+For example, if an unrecognized status code of 471 is received by a client, the client can assume that there was something wrong with its request and treat the response as if it had received a 400 (Bad Request) status code. The response message will usually contain a representation that explains the status.
+
+The first digit of the status-code defines the class of response. The last two digits do not have any categorization role. There are five values for the first digit:
+
+* 1xx (Informational): The request was received, continuing process
+
+* 2xx (Successful): The request was successfully received, understood, and accepted
+
+* 3xx (Redirection): Further action needs to be taken in order to complete the request
+
+* 4xx (Client Error): The request contains bad syntax or cannot be fulfilled
+
+* 5xx (Server Error): The server failed to fulfill an apparently valid request
+
+### Overview of Status Codes
+
+The status codes listed below are defined in this specification, Section 4 of [RFC7232], Section 4 of [RFC7233], and Section 3 of [RFC7235]. The reason phrases listed here are only recommendations — they can be replaced by local equivalents without affecting the protocol.
+
+Responses with status codes that are defined as cacheable by default (e.g., 200, 203, 204, 206, 300, 301, 404, 405, 410, 414, and 501 in this specification) can be reused by a cache with heuristic expiration unless otherwise indicated by the method definition or explicit cache controls [RFC7234]; all other status codes are not cacheable by default.
+
+| Code | 	Reason-Phrase                | Defined in...            |
+|------|-------------------------------|--------------------------|
+| 100	 | Continue	                     | Section 6.2.1            |                        
+| 101	 | Switching Protocols	         | Section 6.2.2            |  
+| 200	 | OK	                           | Section 6.3.1            |  
+| 201	 | Created	                     | Section 6.3.2            |  
+| 202	 | Accepted	                     | Section 6.3.3            |  
+| 203	 | Non-Authoritative Information | Section 6.3.4            |  
+| 204	 | No Content	                   | Section 6.3.5            |  
+| 205	 | Reset Content	               | Section 6.3.6            |  
+| 206	 | Partial Content	             | Section 4.1 of [RFC7233] | 
+| 300	 | Multiple Choices	             | Section 6.4.1            |
+| 301	 | Moved Permanently	           | Section 6.4.2            |
+| 302	 | Found	                       | Section 6.4.3            |
+| 303	 | See Other	                   | Section 6.4.4            | 
+| 304	 | Not Modified	                 | Section 4.1 of [RFC7232] | 
+| 305	 | Use Proxy	                   | Section 6.4.5            | 
+| 307	 | Temporary Redirect	           | Section 6.4.7            |
+| 400	 | Bad Request	                 | Section 6.5.1            | 
+| 401	 | Unauthorized	                 | Section 3.1 of [RFC7235] | 
+| 402	 | Payment Required	             | Section 6.5.2            |
+| 403	 | Forbidden	                   | Section 6.5.3            |
+| 404	 | Not Found	                   | Section 6.5.4            |
+| 405	 | Method Not Allowed	           | Section 6.5.5            |
+| 406	 | Not Acceptable	               | Section 6.5.6            |
+| 407	 | Proxy Authentication Required | Section 3.2 of [RFC7235] |
+| 408	 | Request Timeout	             | Section 6.5.7            |
+| 409	 | Conflict	                     | Section 6.5.8            |
+| 410	 | Gone	                         | Section 6.5.9            |
+| 411	 | Length Required	             | Section 6.5.10           |
+| 412	 | Precondition Failed	         | Section 4.2 of [RFC7232] |
+| 413	 | Payload Too Large	           | Section 6.5.11           |
+| 414	 | URI Too Long	                 | Section 6.5.12           |
+| 415	 | Unsupported Media Type	       | Section 6.5.13           |
+| 416	 | Range Not Satisfiable	       | Section 4.4 of [RFC7233] |
+| 417	 | Expectation Failed	           | Section 6.5.14           |
+| 426	 | Upgrade Required	             | Section 6.5.15           |
+| 500	 | Internal Server Error	       | Section 6.6.1            |
+| 501	 | Not Implemented	             | Section 6.6.2            |
+| 502	 | Bad Gateway	                 | Section 6.6.3            |
+| 503	 | Service Unavailable	         | Section 6.6.4            |
+| 504	 | Gateway Timeout	             | Section 6.6.5            |
+| 505	 | HTTP Version Not Supported	   | Section 6.6.6            |
+
+
+Note that this list is not exhaustive — it does not include extension status codes defined in other specifications. The complete list of status codes is maintained by IANA. See Section 8.2 for details.
+
+### Informational 1xx
+
+The 1xx (Informational) class of status code indicates an interim response for communicating connection status or request progress prior to completing the requested action and sending a final response. 1xx responses are terminated by the first empty line after the status-line (the empty line signaling the end of the header section). Since HTTP/1.0 did not define any 1xx status codes, a server MUST NOT send a 1xx response to an HTTP/1.0 client.
+
+A client MUST be able to parse one or more 1xx responses received prior to a final response, even if the client does not expect one. A user agent MAY ignore unexpected 1xx responses.
+
+A proxy MUST forward 1xx responses unless the proxy itself requested the generation of the 1xx response. For example, if a proxy adds an "Expect: 100-continue" field when it forwards a request, then it need not forward the corresponding 100 (Continue) response(s).
+
+#### 100 Continue
+
+The 100 (Continue) status code indicates that the initial part of a request has been received and has not yet been rejected by the server. The server intends to send a final response after the request has been fully received and acted upon.
+
+When the request contains an Expect header field that includes a 100-continue expectation, the 100 response indicates that the server wishes to receive the request payload body, as described in Section 5.1.1. The client ought to continue sending the request and discard the 100 response.
+
+If the request did not contain an Expect header field containing the 100-continue expectation, the client can simply discard this interim response.
+
+#### 101 Switching Protocols
+
+The 101 (Switching Protocols) status code indicates that the server understands and is willing to comply with the client's request, via the Upgrade header field (Section 6.7 of [RFC7230]), for a change in the application protocol being used on this connection. The server MUST generate an Upgrade header field in the response that indicates which protocol(s) will be switched to immediately after the empty line that terminates the 101 response.
+
+It is assumed that the server will only agree to switch protocols when it is advantageous to do so. For example, switching to a newer version of HTTP might be advantageous over older versions, and switching to a real-time, synchronous protocol might be advantageous when delivering resources that use such features.
+
+### Successful 2xx
+
+The 2xx (Successful) class of status code indicates that the client's request was successfully received, understood, and accepted.
+
+#### 200 OK
+
+The 200 (OK) status code indicates that the request has succeeded. The payload sent in a 200 response depends on the request method. For the methods defined by this specification, the intended meaning of the payload can be summarized as:
+
+* **GET** a representation of the target resource;
+* **HEAD** the same representation as GET, but without the representation data;
+* **POST** a representation of the status of, or results obtained from, the action;
+* **PUT, DELETE** a representation of the status of the action;
+* **OPTIONS** a representation of the communications options;
+* **TRACE**a representation of the request message as received by the end server. 
+
+Aside from responses to CONNECT, a 200 response always has a payload, though an origin server MAY generate a payload body of zero length. If no payload is desired, an origin server ought to send 204 (No Content) instead. For CONNECT, no payload is allowed because the successful result is a tunnel, which begins immediately after the 200 response header section.
+
+A 200 response is cacheable by default; i.e., unless otherwise indicated by the method definition or explicit cache controls (see Section 4.2.2 of [RFC7234]).
+
+#### 201 Created
+
+The 201 (Created) status code indicates that the request has been fulfilled and has resulted in one or more new resources being created. The primary resource created by the request is identified by either a Location header field in the response or, if no Location field is received, by the effective request URI.
+
+The 201 response payload typically describes and links to the resource(s) created. See Section 7.2 for a discussion of the meaning and purpose of validator header fields, such as ETag and Last-Modified, in a 201 response.
+
+#### 202 Accepted
+
+The 202 (Accepted) status code indicates that the request has been accepted for processing, but the processing has not been completed. The request might or might not eventually be acted upon, as it might be disallowed when processing actually takes place. There is no facility in HTTP for re-sending a status code from an asynchronous operation.
+
+The 202 response is intentionally noncommittal. Its purpose is to allow a server to accept a request for some other process (perhaps a batch-oriented process that is only run once per day) without requiring that the user agent's connection to the server persist until the process is completed. The representation sent with this response ought to describe the request's current status and point to (or embed) a status monitor that can provide the user with an estimate of when the request will be fulfilled.
+
+#### 203 Non-Authoritative Information
+
+The 203 (Non-Authoritative Information) status code indicates that the request was successful but the enclosed payload has been modified from that of the origin server's 200 (OK) response by a transforming proxy (Section 5.7.2 of [RFC7230]). This status code allows the proxy to notify recipients when a transformation has been applied, since that knowledge might impact later decisions regarding the content. For example, future cache validation requests for the content might only be applicable along the same request path (through the same proxies).
+
+The 203 response is similar to the Warning code of 214 Transformation Applied (Section 5.5 of [RFC7234]), which has the advantage of being applicable to responses with any status code.
+
+A 203 response is cacheable by default; i.e., unless otherwise indicated by the method definition or explicit cache controls (see Section 4.2.2 of [RFC7234]).
+
+#### 204 No Content
+
+The 204 (No Content) status code indicates that the server has successfully fulfilled the request and that there is no additional content to send in the response payload body. Metadata in the response header fields refer to the target resource and its selected representation after the requested action was applied.
+
+For example, if a 204 status code is received in response to a PUT request and the response contains an ETag header field, then the PUT was successful and the ETag field-value contains the entity-tag for the new representation of that target resource.
+
+The 204 response allows a server to indicate that the action has been successfully applied to the target resource, while implying that the user agent does not need to traverse away from its current "document view" (if any). The server assumes that the user agent will provide some indication of the success to its user, in accord with its own interface, and apply any new or updated metadata in the response to its active representation.
+
+For example, a 204 status code is commonly used with document editing interfaces corresponding to a "save" action, such that the document being saved remains available to the user for editing. It is also frequently used with interfaces that expect automated data transfers to be prevalent, such as within distributed version control systems.
+
+A 204 response is terminated by the first empty line after the header fields because it cannot contain a message body.
+
+A 204 response is cacheable by default; i.e., unless otherwise indicated by the method definition or explicit cache controls (see Section 4.2.2 of [RFC7234]).
+
+#### 205 Reset Content
+
+The 205 (Reset Content) status code indicates that the server has fulfilled the request and desires that the user agent reset the "document view", which caused the request to be sent, to its original state as received from the origin server.
+
+This response is intended to support a common data entry use case where the user receives content that supports data entry (a form, notepad, canvas, etc.), enters or manipulates data in that space, causes the entered data to be submitted in a request, and then the data entry mechanism is reset for the next entry so that the user can easily initiate another input action.
+
+Since the 205 status code implies that no additional content will be provided, a server MUST NOT generate a payload in a 205 response. In other words, a server MUST do one of the following for a 205 response: a) indicate a zero-length body for the response by including a Content-Length header field with a value of 0; b) indicate a zero-length payload for the response by including a Transfer-Encoding header field with a value of chunked and a message body consisting of a single chunk of zero-length; or, c) close the connection immediately after sending the blank line terminating the header section.
+
+### Redirection 3xx
+
+The 3xx (Redirection) class of status code indicates that further action needs to be taken by the user agent in order to fulfill the request. If a Location header field (Section 7.1.2) is provided, the user agent MAY automatically redirect its request to the URI referenced by the Location field value, even if the specific status code is not understood. Automatic redirection needs to done with care for methods not known to be safe, as defined in Section 4.2.1, since the user might not wish to redirect an unsafe request.
+
+There are several types of redirects:
+
+1. Redirects that indicate the resource might be available at a different URI, as provided by the Location field, as in the status codes 301 (Moved Permanently), 302 (Found), and 307 (Temporary Redirect).
+
+2. Redirection that offers a choice of matching resources, each capable of representing the original request target, as in the 300 (Multiple Choices) status code.
+
+3. Redirection to a different resource, identified by the Location field, that can represent an indirect response to the request, as in the 303 (See Other) status code.
+
+4. Redirection to a previously cached result, as in the 304 (Not Modified) status code.
+
+**Note**: In HTTP/1.0, the status codes 301 (Moved Permanently) and 302 (Found) were defined for the first type of redirect ([RFC1945], Section 9.3). Early user agents split on whether the method applied to the redirect target would be the same as the original request or would be rewritten as GET. Although HTTP originally defined the former semantics for 301 and 302 (to match its original implementation at CERN), and defined 303 (See Other) to match the latter semantics, prevailing practice gradually converged on the latter semantics for 301 and 302 as well. The first revision of HTTP/1.1 added 307 (Temporary Redirect) to indicate the former semantics without being impacted by divergent practice. Over 10 years later, most user agents still do method rewriting for 301 and 302; therefore, this specification makes that behavior conformant when the original request is POST.
+
+A client SHOULD detect and intervene in cyclical redirections (i.e., "infinite" redirection loops).
+
+**Note**: An earlier version of this specification recommended a maximum of five redirections ([RFC2068], Section 10.3). Content developers need to be aware that some clients might implement such a fixed limitation.
+
+#### 300 Multiple Choices
+
+The 300 (Multiple Choices) status code indicates that the target resource has more than one representation, each with its own more specific identifier, and information about the alternatives is being provided so that the user (or user agent) can select a preferred representation by redirecting its request to one or more of those identifiers. In other words, the server desires that the user agent engage in reactive negotiation to select the most appropriate representation(s) for its needs (Section 3.4).
+
+If the server has a preferred choice, the server SHOULD generate a Location header field containing a preferred choice's URI reference. The user agent MAY use the Location field value for automatic redirection.
+
+For request methods other than HEAD, the server SHOULD generate a payload in the 300 response containing a list of representation metadata and URI reference(s) from which the user or user agent can choose the one most preferred. The user agent MAY make a selection from that list automatically if it understands the provided media type. A specific format for automatic selection is not defined by this specification because HTTP tries to remain orthogonal to the definition of its payloads. In practice, the representation is provided in some easily parsed format believed to be acceptable to the user agent, as determined by shared design or content negotiation, or in some commonly accepted hypertext format.
+
+A 300 response is cacheable by default; i.e., unless otherwise indicated by the method definition or explicit cache controls (see Section 4.2.2 of [RFC7234]).
+
+Note: The original proposal for the 300 status code defined the URI header field as providing a list of alternative representations, such that it would be usable for 200, 300, and 406 responses and be transferred in responses to the HEAD method. However, lack of deployment and disagreement over syntax led to both URI and Alternates (a subsequent proposal) being dropped from this specification. It is possible to communicate the list using a set of Link header fields [RFC5988], each with a relationship of "alternate", though deployment is a chicken-and-egg problem.
+
+#### 301 Moved Permanently
+
+The 301 (Moved Permanently) status code indicates that the target resource has been assigned a new permanent URI and any future references to this resource ought to use one of the enclosed URIs. Clients with link-editing capabilities ought to automatically re-link references to the effective request URI to one or more of the new references sent by the server, where possible.
+
+The server SHOULD generate a Location header field in the response containing a preferred URI reference for the new permanent URI. The user agent MAY use the Location field value for automatic redirection. The server's response payload usually contains a short hypertext note with a hyperlink to the new URI(s).
+
+Note: For historical reasons, a user agent MAY change the request method from POST to GET for the subsequent request. If this behavior is undesired, the 307 (Temporary Redirect) status code can be used instead.
+
+A 301 response is cacheable by default; i.e., unless otherwise indicated by the method definition or explicit cache controls (see Section 4.2.2 of [RFC7234]).
+
+#### 302 Found
+
+The 302 (Found) status code indicates that the target resource resides temporarily under a different URI. Since the redirection might be altered on occasion, the client ought to continue to use the effective request URI for future requests.
+
+The server SHOULD generate a Location header field in the response containing a URI reference for the different URI. The user agent MAY use the Location field value for automatic redirection. The server's response payload usually contains a short hypertext note with a hyperlink to the different URI(s).
+
+Note: For historical reasons, a user agent MAY change the request method from POST to GET for the subsequent request. If this behavior is undesired, the 307 (Temporary Redirect) status code can be used instead.
+
+#### 303 See Other
+
+The 303 (See Other) status code indicates that the server is redirecting the user agent to a different resource, as indicated by a URI in the Location header field, which is intended to provide an indirect response to the original request. A user agent can perform a retrieval request targeting that URI (a GET or HEAD request if using HTTP), which might also be redirected, and present the eventual result as an answer to the original request. Note that the new URI in the Location header field is not considered equivalent to the effective request URI.
+
+This status code is applicable to any HTTP method. It is primarily used to allow the output of a POST action to redirect the user agent to a selected resource, since doing so provides the information corresponding to the POST response in a form that can be separately identified, bookmarked, and cached, independent of the original request.
+
+A 303 response to a GET request indicates that the origin server does not have a representation of the target resource that can be transferred by the server over HTTP. However, the Location field value refers to a resource that is descriptive of the target resource, such that making a retrieval request on that other resource might result in a representation that is useful to recipients without implying that it represents the original target resource. Note that answers to the questions of what can be represented, what representations are adequate, and what might be a useful description are outside the scope of HTTP.
+
+Except for responses to a HEAD request, the representation of a 303 response ought to contain a short hypertext note with a hyperlink to the same URI reference provided in the Location header field.
+
+#### 305 Use Proxy
+
+The 305 (Use Proxy) status code was defined in a previous version of this specification and is now deprecated (Appendix B).
+
+#### 306 (Unused)
+
+The 306 status code was defined in a previous version of this specification, is no longer used, and the code is reserved. 
+
+#### 307 Temporary Redirect
+
+The 307 (Temporary Redirect) status code indicates that the target resource resides temporarily under a different URI and the user agent MUST NOT change the request method if it performs an automatic redirection to that URI. Since the redirection can change over time, the client ought to continue using the original effective request URI for future requests.
+
+The server SHOULD generate a Location header field in the response containing a URI reference for the different URI. The user agent MAY use the Location field value for automatic redirection. The server's response payload usually contains a short hypertext note with a hyperlink to the different URI(s).
+
+Note: This status code is similar to 302 (Found), except that it does not allow changing the request method from POST to GET. This specification defines no equivalent counterpart for 301 (Moved Permanently) ([RFC7238], however, defines the status code 308 (Permanent Redirect) for this purpose).
+
+### Client Error 4xx
+
+The 4xx (Client Error) class of status code indicates that the client seems to have erred. Except when responding to a HEAD request, the server SHOULD send a representation containing an explanation of the error situation, and whether it is a temporary or permanent condition. These status codes are applicable to any request method. User agents SHOULD display any included representation to the user.
+
+#### 400 Bad Request
+
+The 400 (Bad Request) status code indicates that the server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing). 
+
+#### 402 Payment Required
+
+The 402 (Payment Required) status code is reserved for future use.
+
+#### 403 Forbidden
+
+The 403 (Forbidden) status code indicates that the server understood the request but refuses to authorize it. A server that wishes to make public why the request has been forbidden can describe that reason in the response payload (if any).
+
+If authentication credentials were provided in the request, the server considers them insufficient to grant access. The client SHOULD NOT automatically repeat the request with the same credentials. The client MAY repeat the request with new or different credentials. However, a request might be forbidden for reasons unrelated to the credentials.
+
+An origin server that wishes to "hide" the current existence of a forbidden target resource MAY instead respond with a status code of 404 (Not Found).  
+
+#### 404 Not Found
+
+The 404 (Not Found) status code indicates that the origin server did not find a current representation for the target resource or is not willing to disclose that one exists. A 404 status code does not indicate whether this lack of representation is temporary or permanent; the 410 (Gone) status code is preferred over 404 if the origin server knows, presumably through some configurable means, that the condition is likely to be permanent.
+
+A 404 response is cacheable by default; i.e., unless otherwise indicated by the method definition or explicit cache controls (see Section 4.2.2 of [RFC7234]).
+
+#### 405 Method Not Allowed
+
+The 405 (Method Not Allowed) status code indicates that the method received in the request-line is known by the origin server but not supported by the target resource. The origin server MUST generate an Allow header field in a 405 response containing a list of the target resource's currently supported methods.
+
+A 405 response is cacheable by default; i.e., unless otherwise indicated by the method definition or explicit cache controls (see Section 4.2.2 of [RFC7234]).     
+
+#### 406 Not Acceptable
+
+The 406 (Not Acceptable) status code indicates that the target resource does not have a current representation that would be acceptable to the user agent, according to the proactive negotiation header fields received in the request (Section 5.3), and the server is unwilling to supply a default representation.
+
+The server SHOULD generate a payload containing a list of available representation characteristics and corresponding resource identifiers from which the user or user agent can choose the one most appropriate. A user agent MAY automatically select the most appropriate choice from that list. However, this specification does not define any standard for such automatic selection, as described in Section 6.4.1.
+
+#### 408 Request Timeout
+
+The 408 (Request Timeout) status code indicates that the server did not receive a complete request message within the time that it was prepared to wait. A server SHOULD send the "close" connection option (Section 6.1 of [RFC7230]) in the response, since 408 implies that the server has decided to close the connection rather than continue waiting. If the client has an outstanding request in transit, the client MAY repeat that request on a new connection.
+
+#### 409 Conflict
+
+The 409 (Conflict) status code indicates that the request could not be completed due to a conflict with the current state of the target resource. This code is used in situations where the user might be able to resolve the conflict and resubmit the request. The server SHOULD generate a payload that includes enough information for a user to recognize the source of the conflict.
+
+Conflicts are most likely to occur in response to a PUT request. For example, if versioning were being used and the representation being PUT included changes to a resource that conflict with those made by an earlier (third-party) request, the origin server might use a 409 response to indicate that it can't complete the request. In this case, the response representation would likely contain information useful for merging the differences based on the revision history.
+
+#### 410 Gone
+
+The 410 (Gone) status code indicates that access to the target resource is no longer available at the origin server and that this condition is likely to be permanent. If the origin server does not know, or has no facility to determine, whether or not the condition is permanent, the status code 404 (Not Found) ought to be used instead.
+
+The 410 response is primarily intended to assist the task of web maintenance by notifying the recipient that the resource is intentionally unavailable and that the server owners desire that remote links to that resource be removed. Such an event is common for limited-time, promotional services and for resources belonging to individuals no longer associated with the origin server's site. It is not necessary to mark all permanently unavailable resources as "gone" or to keep the mark for any length of time — that is left to the discretion of the server owner.
+
+A 410 response is cacheable by default; i.e., unless otherwise indicated by the method definition or explicit cache controls (see Section 4.2.2 of [RFC7234]).
+
+#### 411 Length Required
+
+The 411 (Length Required) status code indicates that the server refuses to accept the request without a defined Content-Length (Section 3.3.2 of [RFC7230]). The client MAY repeat the request if it adds a valid Content-Length header field containing the length of the message body in the request message.
+
+#### 413 Payload Too Large
+
+The 413 (Payload Too Large) status code indicates that the server is refusing to process a request because the request payload is larger than the server is willing or able to process. The server MAY close the connection to prevent the client from continuing the request.
+
+If the condition is temporary, the server SHOULD generate a Retry-After header field to indicate that it is temporary and after what time the client MAY try again.
+
+#### 414 URI Too Long
+
+The 413 (Payload Too Large) status code indicates that the server is refusing to process a request because the request payload is larger than the server is willing or able to process. The server MAY close the connection to prevent the client from continuing the request.
+
+If the condition is temporary, the server SHOULD generate a Retry-After header field to indicate that it is temporary and after what time the client MAY try again.
+
+#### 415 Unsupported Media Type
+
+The 414 (URI Too Long) status code indicates that the server is refusing to service the request because the request-target (Section 5.3 of [RFC7230]) is longer than the server is willing to interpret. This rare condition is only likely to occur when a client has improperly converted a POST request to a GET request with long query information, when the client has descended into a "black hole" of redirection (e.g., a redirected URI prefix that points to a suffix of itself) or when the server is under attack by a client attempting to exploit potential security holes.
+
+A 414 response is cacheable by default; i.e., unless otherwise indicated by the method definition or explicit cache controls (see Section 4.2.2 of [RFC7234]).
+
+#### 417 Expectation Failed
+
+The 417 (Expectation Failed) status code indicates that the expectation given in the request's Expect header field (Section 5.1.1) could not be met by at least one of the inbound servers.
+
+#### 426 Upgrade Required
+
+The 426 (Upgrade Required) status code indicates that the server refuses to perform the request using the current protocol but might be willing to do so after the client upgrades to a different protocol. The server MUST send an Upgrade header field in a 426 response to indicate the required protocol(s) (Section 6.7 of [RFC7230]).
+
+**Example**:
+
+```shell
+HTTP/1.1 426 Upgrade Required
+Upgrade: HTTP/3.0
+Connection: Upgrade
+Content-Length: 53
+Content-Type: text/plain
+```
+This service requires use of the HTTP/3.0 protocol.
+
+
+## Response Header Fields
+
+The response header fields allow the server to pass additional information about the response beyond what is placed in the status-line. These header fields give information about the server, about further access to the target resource, or about related resources.
+
+Although each response header field has a defined meaning, in general, the precise semantics might be further refined by the semantics of the request method and/or response status code.
+
+### Control Data
+
+
+
 7.1.1.   Origination Date
 7.1.2.   Location
 7.1.3.   Retry-After
