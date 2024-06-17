@@ -66,7 +66,7 @@
 
 - [Request Header Fields](#request-header-fields)
 
-    - [Controls]
+    - [Controls](#controls)
 
         - [Expect](#expect)
 
@@ -75,67 +75,121 @@
       - [Conditionals](#conditionals)
 
       - [Content Negotiation](#content-negotiation-1)
-5.3.1.   Quality Values
-5.3.2.   Accept
-5.3.3.   Accept-Charset
-5.3.4.   Accept-Encoding
-5.3.5.   Accept-Language
-5.4.   Authentication Credentials
-5.5.   Request Context
-5.5.1.   From
-5.5.2.   Referer
-5.5.3.   User-Agent
 
-6.   Response Status Codes
-6.1.   Overview of Status Codes
-6.2.   Informational 1xx
-6.2.1.   100 Continue
-6.2.2.   101 Switching Protocols
-6.3.   Successful 2xx
-6.3.1.   200 OK
-6.3.2.   201 Created
-6.3.3.   202 Accepted
-6.3.4.   203 Non-Authoritative Information
-6.3.5.   204 No Content
-6.3.6.   205 Reset Content
-6.4.   Redirection 3xx
-6.4.1.   300 Multiple Choices
-6.4.2.   301 Moved Permanently
-6.4.3.   302 Found
-6.4.4.   303 See Other
-6.4.5.   305 Use Proxy
-6.4.6.   306 (Unused)
-6.4.7.   307 Temporary Redirect
-6.5.   Client Error 4xx
-6.5.1.   400 Bad Request
-6.5.2.   402 Payment Required
-6.5.3.   403 Forbidden
-6.5.4.   404 Not Found
-6.5.5.   405 Method Not Allowed
-6.5.6.   406 Not Acceptable
-6.5.7.   408 Request Timeout
-6.5.8.   409 Conflict
-6.5.9.   410 Gone
-6.5.10.   411 Length Required
-6.5.11.   413 Payload Too Large
-6.5.12.   414 URI Too Long
-6.5.13.   415 Unsupported Media Type
-6.5.14.   417 Expectation Failed
-6.5.15.   426 Upgrade Required
+          - [Quality Values](#quality-values)
 
+          - [Accept](#accept)
 
-7.   Response Header Fields
-7.1.   Control Data
-7.1.1.   Origination Date
-7.1.2.   Location
-7.1.3.   Retry-After
-7.1.4.   Vary
-7.2.   Validator Header Fields
-7.3.   Authentication Challenges
-7.4.   Response Context
-7.4.1.   Allow
-7.4.2.   Server
-10.   References
+          - [Accept-Charset](#accept-charset)
+
+          - [Accept-Encoding](#accept-encoding)
+          
+          - [Accept-Language](#accept-language)
+
+      - [Authentication Credentials](#authentication-credentials)
+
+      - [Request Context](#request-context)
+
+          - [From](#from)
+
+          - [Referer](#referer)
+
+          - [User-Agent](#user-agent)
+
+- [Response Status Codes](#response-status-codes)
+
+    - [Overview of Status Codes](#overview-of-status-codes)
+
+    - [Informational 1xx](#informational-1xx)
+
+        - [100 Continue](#100-continue)
+
+        - [101 Switching Protocols](#101-switching-protocols)
+
+    - [Successful 2xx](#successful-2xx)
+    
+        - [200 OK](#200-ok)
+
+        - [201 Created](#201-created)
+
+        - [202 Accepted](#202-accepted)
+
+        - [203 Non-Authoritative Information](#203-non-authoritative-information)
+    
+        - [204 No Content](#204-no-content)
+
+        - [205 Reset Content](#205-reset-content)
+
+    - [Redirection 3xx](#redirection-3xx)
+
+        - [300 Multiple Choices](#300-multiple-choices)
+
+        - [301 Moved Permanently](#301-moved-permanently)
+
+        - [302 Found](#302-found)
+
+        - [303 See Other](#303-see-other)
+
+        - [305 Use Proxy](#305-use-proxy)
+
+        - [306 (Unused)](#306-unused)
+
+        - [307 Temporary Redirect](#307-temporary-redirect)
+
+    - [Client Error 4xx](#client-error-4xx)
+
+        - [400 Bad Request](#400-bad-request)
+
+        - [402 Payment Required](#402-payment-required)
+
+        - [403 Forbidden](#403-forbidden)
+
+        - [404 Not Found](#404-not-found)
+
+        - [405 Method Not Allowed](#405-method-not-allowed)
+
+        - [406 Not Acceptable](#406-not-acceptable)
+
+        - [408 Request Timeout](#408-request-timeout)
+
+        - [409 Conflict](#409-conflict)
+
+        - [410 Gone](#410-gone)
+
+        - [411 Length Required](#411-length-required)
+
+        - [413 Payload Too Large](#413-payload-too-large)
+
+        - [414 URI Too Long](#414-uri-too-long)
+
+        - [415 Unsupported Media Type](#415-unsupported-media-type)
+
+        - [417 Expectation Failed](#417-expectation-failed)
+
+        - [426 Upgrade Required](#426-upgrade-required)
+
+- [Response Header Fields](#response-header-fields)
+
+    - [Control Data](#control-data)
+
+        - [Origination Date]()
+
+        - [Location]
+
+        - [Retry-After]
+
+        - [Vary]
+
+    - [Validator Header Fields]
+
+    - [Authentication Challenges]
+
+    - [Response Context]
+    
+        - [Allow]
+        - [Server]
+
+- [References](#references)
 
 ## Introduction
 
@@ -1044,15 +1098,15 @@ For example, if an unrecognized status code of 471 is received by a client, the 
 
 The first digit of the status-code defines the class of response. The last two digits do not have any categorization role. There are five values for the first digit:
 
-* 1xx (Informational): The request was received, continuing process
+* **1xx** (Informational): The request was received, continuing process
 
-* 2xx (Successful): The request was successfully received, understood, and accepted
+* **2xx** (Successful): The request was successfully received, understood, and accepted
 
-* 3xx (Redirection): Further action needs to be taken in order to complete the request
+* **3xx** (Redirection): Further action needs to be taken in order to complete the request
 
-* 4xx (Client Error): The request contains bad syntax or cannot be fulfilled
+* **4xx** (Client Error): The request contains bad syntax or cannot be fulfilled
 
-* 5xx (Server Error): The server failed to fulfill an apparently valid request
+* **5xx** (Server Error): The server failed to fulfill an apparently valid request
 
 ### Overview of Status Codes
 
@@ -1372,17 +1426,273 @@ Although each response header field has a defined meaning, in general, the preci
 
 ### Control Data
 
+Response header fields can supply control data that supplements the status code, directs caching, or instructs the client where to go next.
 
+| Header Field Name |	Defined in...            |   
+|-------------------|--------------------------|      
+| Age	              | Section 5.1 of [RFC7234] |
+| Cache-Control     | Section 5.2 of [RFC7234] |
+| Expires           |	Section 5.3 of [RFC7234] |
+| Date             	| Section 7.1.1.2          |
+| Location          |	Section 7.1.2            |
+| Retry-After       |	Section 7.1.3            |
+| Vary              | Section 7.1.4            |
+| Warning	          | Section 5.5 of [RFC7234] |
 
-7.1.1.   Origination Date
-7.1.2.   Location
-7.1.3.   Retry-After
-7.1.4.   Vary
-7.2.   Validator Header Fields
-7.3.   Authentication Challenges
-7.4.   Response Context
-7.4.1.   Allow
-7.4.2.   Server
+#### Origination Date
 
-8.   References
+- **Date/Time Formats**
 
+Prior to 1995, there were three different formats commonly used by servers to communicate timestamps. For compatibility with old implementations, all three are defined here. The preferred format is a fixed-length and single-zone subset of the date and time specification used by the Internet Message Format [RFC5322].
+
+  HTTP-date    = IMF-fixdate / obs-date
+An example of the preferred format is
+
+Sun, 06 Nov 1994 08:49:37 GMT    ; IMF-fixdate
+Examples of the two obsolete formats are
+
+Sunday, 06-Nov-94 08:49:37 GMT   ; obsolete RFC 850 format
+Sun Nov  6 08:49:37 1994         ; ANSI C's asctime() format
+
+A recipient that parses a timestamp value in an HTTP header field MUST accept all three HTTP-date formats. When a sender generates a header field that contains one or more timestamps defined as HTTP-date, the sender MUST generate those timestamps in the IMF-fixdate format.
+
+An HTTP-date value represents time as an instance of Coordinated Universal Time (UTC). The first two formats indicate UTC by the three-letter abbreviation for Greenwich Mean Time, "GMT", a predecessor of the UTC name; values in the asctime format are assumed to be in UTC. A sender that generates HTTP-date values from a local clock ought to use NTP ([RFC5905]) or some similar protocol to synchronize its clock to UTC.
+
+**Preferred format:**
+
+```shell
+  IMF-fixdate  = day-name "," SP date1 SP time-of-day SP GMT
+  ; fixed length/zone/capitalization subset of the format
+  ; see Section 3.3 of [RFC5322]
+  
+  day-name     = %x4D.6F.6E ; "Mon", case-sensitive
+               / %x54.75.65 ; "Tue", case-sensitive
+               / %x57.65.64 ; "Wed", case-sensitive
+               / %x54.68.75 ; "Thu", case-sensitive
+               / %x46.72.69 ; "Fri", case-sensitive
+               / %x53.61.74 ; "Sat", case-sensitive
+               / %x53.75.6E ; "Sun", case-sensitive
+               
+  date1        = day SP month SP year
+               ; e.g., 02 Jun 1982
+
+  day          = 2DIGIT
+  month        = %x4A.61.6E ; "Jan", case-sensitive
+               / %x46.65.62 ; "Feb", case-sensitive
+               / %x4D.61.72 ; "Mar", case-sensitive
+               / %x41.70.72 ; "Apr", case-sensitive
+               / %x4D.61.79 ; "May", case-sensitive
+               / %x4A.75.6E ; "Jun", case-sensitive
+               / %x4A.75.6C ; "Jul", case-sensitive
+               / %x41.75.67 ; "Aug", case-sensitive
+               / %x53.65.70 ; "Sep", case-sensitive
+               / %x4F.63.74 ; "Oct", case-sensitive
+               / %x4E.6F.76 ; "Nov", case-sensitive
+               / %x44.65.63 ; "Dec", case-sensitive
+  year         = 4DIGIT
+
+  GMT          = %x47.4D.54 ; "GMT", case-sensitive
+
+  time-of-day  = hour ":" minute ":" second
+               ; 00:00:00 - 23:59:60 (leap second)
+                 
+  hour         = 2DIGIT               
+  minute       = 2DIGIT               
+  second       = 2DIGIT
+```  
+
+**Obsolete formats:**
+
+```shell
+  obs-date     = rfc850-date / asctime-date 
+  rfc850-date  = day-name-l "," SP date2 SP time-of-day SP GMT
+  date2        = day "-" month "-" 2DIGIT
+               ; e.g., 02-Jun-82
+
+  day-name-l   = %x4D.6F.6E.64.61.79    ; "Monday", case-sensitive
+         / %x54.75.65.73.64.61.79       ; "Tuesday", case-sensitive
+         / %x57.65.64.6E.65.73.64.61.79 ; "Wednesday", case-sensitive
+         / %x54.68.75.72.73.64.61.79    ; "Thursday", case-sensitive
+         / %x46.72.69.64.61.79          ; "Friday", case-sensitive
+         / %x53.61.74.75.72.64.61.79    ; "Saturday", case-sensitive
+         / %x53.75.6E.64.61.79          ; "Sunday", case-sensitive
+  asctime-date = day-name SP date3 SP time-of-day SP year
+  date3        = month SP ( 2DIGIT / ( SP 1DIGIT ))
+               ; e.g., Jun  2
+```
+
+HTTP-date is case sensitive. A sender MUST NOT generate additional whitespace in an HTTP-date beyond that specifically included as SP in the grammar. The semantics of day-name, day, month, year, and time-of-day are the same as those defined for the Internet Message Format constructs with the corresponding name ([RFC5322], Section 3.3).
+
+Recipients of a timestamp value in rfc850-date format, which uses a two-digit year, MUST interpret a timestamp that appears to be more than 50 years in the future as representing the most recent year in the past that had the same last two digits.
+
+Recipients of timestamp values are encouraged to be robust in parsing timestamps unless otherwise restricted by the field definition. For example, messages are occasionally forwarded over HTTP from a non-HTTP source that might generate any of the date and time specifications defined by the Internet Message Format.
+
+**Note**: HTTP requirements for the date/time stamp format apply only to their usage within the protocol stream. Implementations are not required to use these formats for user presentation, request logging, etc.
+
+- **Date**
+
+The "Date" header field represents the date and time at which the message was originated, having the same semantics as the Origination Date Field (orig-date) defined in Section 3.6.1 of [RFC5322]. The field value is an HTTP-date, as defined in Section 7.1.1.1.
+
+```shell
+  Date = HTTP-date
+```
+
+**An example is**
+
+```shell
+  Date: Tue, 15 Nov 1994 08:12:31 GMT
+```
+When a Date header field is generated, the sender SHOULD generate its field value as the best available approximation of the date and time of message generation. In theory, the date ought to represent the moment just before the payload is generated. In practice, the date can be generated at any time during message origination.
+
+An origin server MUST NOT send a Date header field if it does not have a clock capable of providing a reasonable approximation of the current instance in Coordinated Universal Time. An origin server MAY send a Date header field if the response is in the 1xx (Informational) or 5xx (Server Error) class of status codes. An origin server MUST send a Date header field in all other cases.
+
+A recipient with a clock that receives a response message without a Date header field MUST record the time it was received and append a corresponding Date header field to the message's header section if it is cached or forwarded downstream.
+
+A user agent MAY send a Date header field in a request, though generally will not do so unless it is believed to convey useful information to the server. For example, custom applications of HTTP might convey a Date if the server is expected to adjust its interpretation of the user's request based on differences between the user agent and server clocks.
+
+#### Location
+
+The "Location" header field is used in some responses to refer to a specific resource in relation to the response. The type of relationship is defined by the combination of request method and status code semantics.
+
+```shell
+  Location = URI-reference
+```
+
+The field value consists of a single URI-reference. When it has the form of a relative reference ([RFC3986], Section 4.2), the final value is computed by resolving it against the effective request URI ([RFC3986], Section 5).
+
+For 201 (Created) responses, the Location value refers to the primary resource created by the request. For 3xx (Redirection) responses, the Location value refers to the preferred target resource for automatically redirecting the request.
+
+If the Location value provided in a 3xx (Redirection) response does not have a fragment component, a user agent MUST process the redirection as if the value inherits the fragment component of the URI reference used to generate the request target (i.e., the redirection inherits the original reference's fragment, if any).
+
+For example, a GET request generated for the URI reference "http://www.example.org/~tim" might result in a 303 (See Other) response containing the header field:
+
+  Location: /People.html#tim
+
+which suggests that the user agent redirect to "http://www.example.org/People.html#tim"
+
+Likewise, a GET request generated for the URI reference "http://www.example.org/index.html#larry" might result in a 301 (Moved Permanently) response containing the header field:
+
+  Location: http://www.example.net/index.html
+which suggests that the user agent redirect to "http://www.example.net/index.html#larry", preserving the original fragment identifier.
+
+There are circumstances in which a fragment identifier in a Location value would not be appropriate. For example, the Location header field in a 201 (Created) response is supposed to provide a URI that is specific to the created resource.
+
+Note: Some recipients attempt to recover from Location fields that are not valid URI references. This specification does not mandate or define such processing, but does allow it for the sake of robustness.
+
+Note: The Content-Location header field (Section 3.1.4.2) differs from Location in that the Content-Location refers to the most specific resource corresponding to the enclosed representation. It is therefore possible for a response to contain both the Location and Content-Location header fields.
+
+#### Retry-After
+
+Servers send the "Retry-After" header field to indicate how long the user agent ought to wait before making a follow-up request. When sent with a 503 (Service Unavailable) response, Retry-After indicates how long the service is expected to be unavailable to the client. When sent with any 3xx (Redirection) response, Retry-After indicates the minimum time that the user agent is asked to wait before issuing the redirected request.
+
+The value of this field can be either an HTTP-date or a number of seconds to delay after the response is received.
+
+  Retry-After = HTTP-date / delay-seconds
+
+A delay-seconds value is a non-negative decimal integer, representing time in seconds.
+
+  delay-seconds  = 1*DIGIT
+Two examples of its use are
+
+  Retry-After: Fri, 31 Dec 1999 23:59:59 GMT
+  Retry-After: 120
+In the latter example, the delay is 2 minutes.
+
+#### Vary
+
+The "Vary" header field in a response describes what parts of a request message, aside from the method, Host header field, and request target, might influence the origin server's process for selecting and representing this response. The value consists of either a single asterisk ("*") or a list of header field names (case-insensitive).
+
+  Vary = "*" / 1#field-name
+
+A Vary field value of "*" signals that anything about the request might play a role in selecting the response representation, possibly including elements outside the message syntax (e.g., the client's network address). A recipient will not be able to determine whether this response is appropriate for a later request without forwarding the request to the origin server. A proxy MUST NOT generate a Vary field with a "*" value.
+
+A Vary field value consisting of a comma-separated list of names indicates that the named request header fields, known as the selecting header fields, might have a role in selecting the representation. The potential selecting header fields are not limited to those defined by this specification.
+
+For example, a response that contains
+
+```shell
+  Vary: accept-encoding, accept-language
+```
+
+indicates that the origin server might have used the request's Accept-Encoding and Accept-Language fields (or lack thereof) as determining factors while choosing the content for this response.
+
+An origin server might send Vary with a list of fields for two purposes:
+
+1. To inform cache recipients that they MUST NOT use this response to satisfy a later request unless the later request has the same values for the listed fields as the original request (Section 4.1 of [RFC7234]). In other words, Vary expands the cache key required to match a new request to the stored cache entry.
+
+2. To inform user agent recipients that this response is subject to content negotiation (Section 5.3) and that a different representation might be sent in a subsequent request if additional parameters are provided in the listed header fields (proactive negotiation).
+
+An origin server SHOULD send a Vary header field when its algorithm for selecting a representation varies based on aspects of the request message other than the method and request target, unless the variance cannot be crossed or the origin server has been deliberately configured to prevent cache transparency. For example, there is no need to send the Authorization field name in Vary because reuse across users is constrained by the field definition (Section 4.2 of [RFC7235]). Likewise, an origin server might use Cache-Control directives (Section 5.2 of [RFC7234]) to supplant Vary if it considers the variance less significant than the performance cost of Vary's impact on caching.
+
+### Validator Header Fields
+
+Validator header fields convey metadata about the selected representation (Section 3). In responses to safe requests, validator fields describe the selected representation chosen by the origin server while handling the response. Note that, depending on the status code semantics, the selected representation for a given response is not necessarily the same as the representation enclosed as response payload.
+
+In a successful response to a state-changing request, validator fields describe the new representation that has replaced the prior selected representation as a result of processing the request.
+
+For example, an ETag header field in a 201 (Created) response communicates the entity-tag of the newly created resource's representation, so that it can be used in later conditional requests to prevent the "lost update" problem [RFC7232].
+
+| Header Field Name |	Defined in...           |
+|-------------------|-------------------------|
+| ETag              | Section 2.3 of [RFC7232]|
+| Last-Modified     |	Section 2.2 of [RFC7232]|
+
+### Authentication Challenges
+
+Authentication challenges indicate what mechanisms are available for the client to provide authentication credentials in future requests.
+
+| Header Field Name   |	Defined in...               |
+|---------------------|-----------------------------|
+| WWW-Authenticate    |	Section 4.1 of [RFC7235]    |
+| Proxy-Authenticate  |	Section 4.3 of [RFC7235]    |
+
+### Response Context
+
+The remaining response header fields provide more information about the target resource for potential use in later requests.
+
+| Header Field Name	| Defined in...             |
+|-------------------|---------------------------|
+| Accept-Ranges     |	Section 2.3 of [RFC7233]  |
+| Allow             |	Section 7.4.1             |
+| Server            | Section 7.4.2             |
+
+#### Allow
+
+The "Allow" header field lists the set of methods advertised as supported by the target resource. The purpose of this field is strictly to inform the recipient of valid request methods associated with the resource.
+
+```shell
+  Allow = #method
+```
+
+**Example of use:**
+
+```shell
+  Allow: GET, HEAD, PUT
+```
+
+The actual set of allowed methods is defined by the origin server at the time of each request. An origin server MUST generate an Allow field in a 405 (Method Not Allowed) response and MAY do so in any other response. An empty Allow field value indicates that the resource allows no methods, which might occur in a 405 response if the resource has been temporarily disabled by configuration.
+
+A proxy MUST NOT modify the Allow header field — it does not need to understand all of the indicated methods in order to handle them according to the generic message handling rules.
+
+#### Server
+
+The "Server" header field contains information about the software used by the origin server to handle the request, which is often used by clients to help identify the scope of reported interoperability problems, to work around or tailor requests to avoid particular server limitations, and for analytics regarding server or operating system use. An origin server MAY generate a Server field in its responses.
+
+```shell
+  Server = product *( RWS ( product / comment ) )
+```
+The Server field-value consists of one or more product identifiers, each followed by zero or more comments (Section 3.2 of [RFC7230]), which together identify the origin server software and its significant subproducts. By convention, the product identifiers are listed in decreasing order of their significance for identifying the origin server software. Each product identifier consists of a name and optional version, as defined in Section 5.5.3.
+
+**Example:**
+
+```shell
+  Server: CERN/3.0 libwww/2.17
+```
+
+An origin server SHOULD NOT generate a Server field containing needlessly fine-grained detail and SHOULD limit the addition of subproducts by third parties. Overly long and detailed Server field values increase response latency and potentially reveal internal implementation details that might make it (slightly) easier for attackers to find and exploit known security holes.
+
+## References
+
+**If to learn click this link button** 👇
+
+- [References](https://httpwg.org/specs/rfc7231.html#quality.values)
