@@ -172,22 +172,23 @@
 
     - [Control Data](#control-data)
 
-        - [Origination Date]()
+        - [Origination Date](#origination-date)
 
-        - [Location]
+        - [Location](#location)
 
-        - [Retry-After]
+        - [Retry-After](#retry-after)
 
-        - [Vary]
+        - [Vary](#vary)
 
-    - [Validator Header Fields]
+    - [Validator Header Fields](#validator-header-fields)
 
-    - [Authentication Challenges]
+    - [Authentication Challenges](#authentication-challenges)
 
-    - [Response Context]
+    - [Response Context](#response-context)
     
-        - [Allow]
-        - [Server]
+        - [Allow](#allow)
+
+        - [Server](#server)
 
 - [References](#references)
 
